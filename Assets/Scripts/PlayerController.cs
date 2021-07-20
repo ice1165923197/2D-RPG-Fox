@@ -13,9 +13,13 @@ public class PlayerController : MonoBehaviour
     public Transform groundCheck;
     public LayerMask ground;
 
+    //Ã¯‘æ°¢µÿ√Ê≈–∂œ
     public bool isGround, isJump, isDashing;
     public int jumpCount;
     bool jumpPressed;
+
+    //
+    public int Cherry=0;
 
     private float horizontalmove = 0;
 
@@ -96,6 +100,15 @@ public class PlayerController : MonoBehaviour
             {
                 anim.SetBool("falling", false);
             }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag=="Collection")
+        {
+            Cherry += 1;
+            Destroy(collision.gameObject);
         }
     }
 }
