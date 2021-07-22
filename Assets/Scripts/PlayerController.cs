@@ -6,15 +6,18 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
     private Collider2D coll;
+    private Collider2D smallcoll;
+    //private Collider2D tmp;
     private Animator anim;
     //public Rigidbody2D rd;
     public float speed = 10f;
     public float jumpforce;
     public Transform groundCheck;
+    public Transform headCheck;
     public LayerMask ground;
 
     //Ã¯‘æ°¢µÿ√Ê≈–∂œ
-    public bool isGround, isJump, isDashing;
+    public bool isGround, isJump, isDashing, isHead;
     public int jumpCount;
     bool jumpPressed;
 
@@ -22,12 +25,14 @@ public class PlayerController : MonoBehaviour
     public int Cherry=0;
 
     private float horizontalmove = 0;
+    private float verticalmove = 0;
 
     // Start is called before the first frame update
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        coll = GetComponent<Collider2D>();
+        coll = GetComponent<BoxCollider2D>();
+        smallcoll = GetComponent<CapsuleCollider2D>();
         anim = GetComponent<Animator>();
     }
     void Start()
@@ -48,10 +53,12 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         isGround = Physics2D.OverlapCircle(groundCheck.position, 0.1f, ground);
+        isHead = Physics2D.OverlapCircle(headCheck.position, 0.49f, ground);
+        //tmp= Physics2D.OverlapCircle(headCheck.position, 0.5f, ground);
         Movement();
+        Crouch();
         Jump();
         SwitchAnimation();
-
     }
 
     void Movement()
@@ -65,6 +72,26 @@ public class PlayerController : MonoBehaviour
             transform.localScale = new Vector3(horizontalmove, 1, 1);
         }
     }
+
+    void Crouch()
+    {
+        verticalmove = Input.GetAxisRaw("Vertical");
+        if(verticalmove<0)
+        {
+            anim.SetBool("crouching", true);
+            coll.enabled = false;
+            smallcoll.enabled = true;
+        }
+        else if(!isHead)
+        {
+            anim.SetBool("crouching", false);
+            coll.enabled = true;
+            smallcoll.enabled = false;
+        }
+        //Debug.Log(tmp);
+        //Debug.Log(isHead);
+    }
+
     void Jump()
     {
         if(isGround)
