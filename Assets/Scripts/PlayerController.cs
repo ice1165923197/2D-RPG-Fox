@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -22,7 +23,8 @@ public class PlayerController : MonoBehaviour
     bool jumpPressed;
 
     //
-    public int Cherry=0;
+    public int Cherry=0,Gem=0;
+    public Text CherryNumber,GemNumber;
 
     private float horizontalmove = 0;
     private float verticalmove = 0;
@@ -135,6 +137,12 @@ public class PlayerController : MonoBehaviour
         if(collision.tag=="Collection")
         {
             Cherry += 1;
+            CherryNumber.text = Cherry.ToString();
+            Destroy(collision.gameObject);
+        }else if(collision.tag=="Gem")
+        {
+            Gem += 1;
+            GemNumber.text = Gem.ToString();
             Destroy(collision.gameObject);
         }
     }
