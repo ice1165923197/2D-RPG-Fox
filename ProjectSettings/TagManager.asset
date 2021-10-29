@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Collection
   - Gem
+  - Enemies
+  - DeadLine
   layers:
   - Default
   - TransparentFX
@@ -48,6 +50,9 @@ TagManager:
     locked: 0
   - name: FrontGround
     uniqueID: 3415045231
+    locked: 0
+  - name: Enemy
+    uniqueID: 2104853523
     locked: 0
   - name: Player
     uniqueID: 4187579733
