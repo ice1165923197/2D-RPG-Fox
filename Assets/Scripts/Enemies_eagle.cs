@@ -7,11 +7,11 @@ public class Enemies_eagle : Enemies
     //private Rigidbody2D rb;
     //private Animator anim;
 
-    public Transform uppoint, downpoint;
-    private float upvalue, downvalue;
+    public Transform upPoint, downPoint;
+    private float upValue, downValue;
     public float speed;
 
-    private bool faceup = true;
+    private bool isFaceUp = true;
 
     void Awake()
     {
@@ -23,10 +23,10 @@ public class Enemies_eagle : Enemies
         base.Start();
         //rb = GetComponent<Rigidbody2D>();
         //anim = GetComponent<Animator>();
-        upvalue = uppoint.transform.position.y;
-        downvalue = downpoint.transform.position.y;
-        Destroy(uppoint.gameObject);
-        Destroy(downpoint.gameObject);
+        upValue = upPoint.transform.position.y;
+        downValue = downPoint.transform.position.y;
+        Destroy(upPoint.gameObject);
+        Destroy(downPoint.gameObject);
     }
 
     // Update is called once per frame
@@ -37,21 +37,15 @@ public class Enemies_eagle : Enemies
 
     void Movement()
     {
-        if(transform.position.y>=upvalue)
+        if(transform.position.y>=upValue)
         {
-            faceup = true;
+            isFaceUp = true;
         }
-        else if(transform.position.y<=downvalue)
+        else if(transform.position.y<=downValue)
         {
-            faceup = false;
+            isFaceUp = false;
         }
-        if(faceup)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, -speed);
-        }
-        else
-        {
-            rb.velocity = new Vector2(rb.velocity.x, speed);
-        }
+        rb.velocity = new Vector2(rb.velocity.x, (isFaceUp?-1:1) * speed);
+
     }
 }

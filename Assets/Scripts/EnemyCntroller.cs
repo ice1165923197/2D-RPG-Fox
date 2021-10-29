@@ -6,79 +6,71 @@ public class EnemyCntroller : Enemies
 {
     GameObject player;
     Transform thistf, playertf;
-    Rigidbody2D thisrb;
+    StateManager stateManager;
 
-    StateManager statemanager;
-    Vector3 point1, point2;//在point1和point2之间来回巡逻
+    Vector3 leftValue, rightValue;
     public Transform leftpoint, rightpoint;
-    public bool target;//true表示点2为目标，false表示点1
-    float moveSpeed;
+    public bool isFaceRight = false;
+    float speed;
 
     // Start is called before the first frame update
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
-        thistf = this.GetComponent<Transform>();
-        thisrb = this.GetComponent<Rigidbody2D>();
+        thistf = GetComponent<Transform>();
+        rb = GetComponent<Rigidbody2D>();
         playertf = player.GetComponent<Transform>();
 
-        statemanager = new StateManager();
-        statemanager.RegionState("Idle");
-        statemanager.RegionState("Chase");
-        statemanager.SetDefaultState("Idle");
+        stateManager = new StateManager();
+        stateManager.RegionState("Idle");
+        stateManager.RegionState("Chase");
+        stateManager.SetDefaultState("Idle");
 
-        point1 = leftpoint.position;
-        point2 = rightpoint.position;
+        leftValue = leftpoint.position;
+        rightValue = rightpoint.position;
 
-        moveSpeed = 6f;
+        speed = 3f;
     }
 
     // Update is called once per frame
     void Update()
     {
         //Chase();
-        if ((player.transform.position - transform.position).magnitude < 3)
+        if ((player.transform.position - transform.position).magnitude < 4)
         {
-            statemanager.ChangeState("Chase");
+            stateManager.ChangeState("Chase");
         }
         else
         {
-            statemanager.ChangeState("Idle");
+            stateManager.ChangeState("Idle");
         }
-        statemanager.KeepState(this);
+        stateManager.KeepState(this);
+        transform.localScale = new Vector3(rb.velocity.x > 0 ? -1 : 1, 1, 1);
     }
 
     public void Chase()
     {
-        thisrb.velocity = Vector3.Normalize(playertf.position - thistf.position) * 2f;
+        rb.velocity = new Vector2((playertf.position.x>thistf.position.x?1:-1) * speed, rb.velocity.y);
     }
 
     public void Idle()
     {
-        //如果不在原有路径，则先返回（0，0，0）
-        /*if (Mathf.Abs(this.transform.position.y) >= 0.05)
+        if (isFaceRight)
         {
-            this.transform.position = Vector3.Lerp(this.transform.position, new Vector3(0, 0, 0),0.05f);
-            //this.GetComponent<Rigidbody2D>().velocity = Vector3.Normalize(-1 * this.transform.position) * moveSpeed;
-            return;
-        }*/
-
-        if (target)
-        {
-            this.GetComponent<Rigidbody2D>().velocity = new Vector2(moveSpeed, 0);
+            rb.velocity = new Vector2(speed, rb.velocity.y);
             //target = this.transform.position.x < point1.x;
-            if(transform.position.x > point2.x)
+            if(transform.position.x > rightValue.x)
             {
-                target = false;
+                isFaceRight = false;
             }
         }
         else
         {
-            this.GetComponent<Rigidbody2D>().velocity = new Vector2(-1 * moveSpeed, 0);
+            rb.velocity = new Vector2(-1 * speed, rb.velocity.y);
             //target = this.transform.position.x <= point2.x;
-            if (transform.position.x < point1.x)
+            if (transform.position.x < leftValue.x)
             {
-                target = true;
+                isFaceRight = true;
             }
         }
     }

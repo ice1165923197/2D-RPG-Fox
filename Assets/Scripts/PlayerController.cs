@@ -8,39 +8,39 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
     private Collider2D coll;
-    private Collider2D smallcoll;
+    private Collider2D smallColl;
     //private Collider2D tmp;
-    private Animator anim;
-    //public Rigidbody2D rd;
+    private Animator anim;    
+    private float horizontalMove = 0;
+    private float verticalMove = 0;
+    private bool isHurt;
+    private float hurtTime = 0.3f;
+
+    public PhysicsMaterial2D friction0, friction1;
+    public AudioSource bgmAudio,jumpAudio,cherryAudio,gemAudio,hurtAudio;
+
     public float speed = 10f;
-    public float jumpforce;
+    public float jumpForce;
+
+    //跳跃、地面判断
     public Transform groundCheck;
     public Transform headCheck;
     public LayerMask ground;
-    public PhysicsMaterial2D f0,f1;
-    public AudioSource bgmAudio,jumpAudio,cherryAudio,gemAudio,hurtAudio;
-
-    //跳跃、地面判断
     public bool isGround, isJump, isDashing, isHead;
     public int jumpCount;
     bool jumpPressed;
 
-    //
-    public int Cherry=0,Gem=0;
-    public Text CherryNumber,GemNumber;
+    //收集品计数
+    public int cherry=0,gem=0;
+    public Text cherryNumber,gemNumber;
 
-    private float horizontalmove = 0;
-    private float verticalmove = 0;
-
-    private bool isHurt;
-    private float hurtTime = 0.5f;
 
     // Start is called before the first frame update
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<BoxCollider2D>();
-        smallcoll = GetComponent<CapsuleCollider2D>();
+        smallColl = GetComponent<CapsuleCollider2D>();
         anim = GetComponent<Animator>();
     }
     void Start()
@@ -65,11 +65,11 @@ public class PlayerController : MonoBehaviour
         //tmp= Physics2D.OverlapCircle(headCheck.position, 0.5f, ground);
         if (isGround)
         {
-                rb.sharedMaterial = f1;
+                rb.sharedMaterial = friction1;
         }
-        if (!isGround)
+        else
         {
-                rb.sharedMaterial = f0;
+                rb.sharedMaterial = friction0;
         }
         if (!isHurt)
         {
@@ -77,36 +77,35 @@ public class PlayerController : MonoBehaviour
             Crouch();
             Jump();
         }
-        
         SwitchAnimation();
     }
 
     void Movement()
     {
-        horizontalmove = Input.GetAxisRaw("Horizontal");
-        anim.SetFloat("running", Mathf.Abs(horizontalmove));
-        rb.velocity = new Vector2(horizontalmove * speed, rb.velocity.y);
+        horizontalMove = Input.GetAxisRaw("Horizontal");
+        anim.SetFloat("running", Mathf.Abs(horizontalMove));
+        rb.velocity = new Vector2(horizontalMove * speed, rb.velocity.y);
 
-        if(horizontalmove!=0)
+        if(horizontalMove!=0)
         {
-            transform.localScale = new Vector3(horizontalmove, 1, 1);
+            transform.localScale = new Vector3(horizontalMove, 1, 1);
         }
     }
 
     void Crouch()
     {
-        verticalmove = Input.GetAxisRaw("Vertical");
-        if(verticalmove<0)
+        verticalMove = Input.GetAxisRaw("Vertical");
+        if(verticalMove<0)
         {
             anim.SetBool("crouching", true);
             coll.enabled = false;
-            smallcoll.enabled = true;
+            smallColl.enabled = true;
         }
         else if(!isHead)
         {
             anim.SetBool("crouching", false);
             coll.enabled = true;
-            smallcoll.enabled = false;
+            smallColl.enabled = false;
         }
         //Debug.Log(tmp);
         //Debug.Log(isHead);
@@ -118,17 +117,10 @@ public class PlayerController : MonoBehaviour
         {
             jumpCount = 1;
         }
-        if(jumpPressed&&isGround)
+        if((jumpPressed&&isGround)||(!isGround&&jumpPressed&&jumpCount>0))
         {
             jumpCount--;
-            rb.velocity = new Vector2(rb.velocity.x, jumpforce);
-            jumpPressed = false;
-            jumpAudio.Play();
-        }
-        else if(!isGround&&jumpPressed&&jumpCount>0)
-        {
-            jumpCount--;
-            rb.velocity = new Vector2(rb.velocity.x, jumpforce);
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             jumpPressed = false;
             jumpAudio.Play();
         }
@@ -164,7 +156,7 @@ public class PlayerController : MonoBehaviour
                 isHurt = false;
                 anim.SetBool("hurt", false);
                 anim.SetBool("idle", true);
-                hurtTime = 0.5f;
+                hurtTime = 0.3f;
             }
                
         }
@@ -172,25 +164,27 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.tag=="Collection")
-        {
-            Cherry += 1;
-            CherryNumber.text = Cherry.ToString();
-            Destroy(collision.gameObject);
-            cherryAudio.Play();
-        }else if(collision.tag=="Gem")
-        {
-            Gem += 1;
-            GemNumber.text = Gem.ToString();
-            Destroy(collision.gameObject);
-            gemAudio.Play();
-        }
         if(collision.tag=="DeadLine")
         {
             Invoke("ReStart", 1f);
             bgmAudio.Stop();
             hurtAudio.Play();
         }
+        else if(collision.tag=="Collection")
+        {
+            cherry += 1;
+            cherryNumber.text = cherry.ToString();
+            Destroy(collision.gameObject);
+            cherryAudio.Play();
+        }
+        else if(collision.tag=="Gem")
+        {
+            gem += 1;
+            gemNumber.text = gem.ToString();
+            Destroy(collision.gameObject);
+            gemAudio.Play();
+        }
+        
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -201,18 +195,12 @@ public class PlayerController : MonoBehaviour
             {
                 Enemies enemy = collision.gameObject.GetComponent<Enemies>();
                 enemy.OnJump();
-                rb.velocity = new Vector2(rb.velocity.x, jumpforce);
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
                 anim.SetBool("jumping", true);
             }
-            else if(transform.position.x<collision.gameObject.transform.position.x)
+            else
             {
-                rb.velocity = new Vector2(-5, rb.velocity.y);
-                isHurt = true;
-                hurtAudio.Play();
-            }
-            else if(transform.position.x > collision.gameObject.transform.position.x)
-            {
-                rb.velocity = new Vector2(5, rb.velocity.y);
+                rb.velocity = new Vector2(transform.position.x < collision.gameObject.transform.position.x? -5:5, rb.velocity.y);
                 isHurt = true;
                 hurtAudio.Play();
             }

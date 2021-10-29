@@ -7,15 +7,12 @@ public class Enemies_frog : Enemies
     //private Rigidbody2D rb;
     private Collider2D coll;
     //private Animator anim;
+    private float leftValue, rightValue;
+    private bool isFaceLeft = true, isGround;
 
     public LayerMask ground;
-    public Transform leftpoint, rightpoint;
-    private float leftvalue, rightvalue;
+    public Transform leftPoint, rightPoint;
     public float speed,jumpSpeed;
-
-
-    private bool faceleft = true,isGround;
-
 
     void Awake()
     {
@@ -28,10 +25,10 @@ public class Enemies_frog : Enemies
         //rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<CircleCollider2D>();
         //anim = GetComponent<Animator>();
-        leftvalue = leftpoint.position.x;
-        rightvalue = rightpoint.position.x;
-        Destroy(leftpoint.gameObject);
-        Destroy(rightpoint.gameObject);
+        leftValue = leftPoint.position.x;
+        rightValue = rightPoint.position.x;
+        Destroy(leftPoint.gameObject);
+        Destroy(rightPoint.gameObject);
     }
 
     // Update is called once per frame
@@ -45,12 +42,12 @@ public class Enemies_frog : Enemies
     {
         if (isGround)
         {
-            if(faceleft)
+            if(isFaceLeft)
             {
-                if(transform.position.x<leftvalue)
+                if(transform.position.x<leftValue)
                 {
                     transform.localScale = new Vector3(-1, 1, 1);
-                    faceleft = false;
+                    isFaceLeft = false;
                 }
                 else
                 {
@@ -60,10 +57,10 @@ public class Enemies_frog : Enemies
             }
             else
             {
-                if (transform.position.x > rightvalue)
+                if (transform.position.x > rightValue)
                 {
                     transform.localScale = new Vector3(1, 1, 1);
-                    faceleft = true;
+                    isFaceLeft = true;
                 }
                 else
                 {
